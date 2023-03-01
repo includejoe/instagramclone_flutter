@@ -42,16 +42,18 @@ class _LoginScreenState extends State<LoginScreen> {
                 hintText: "Email",
                 inputType: TextInputType.emailAddress,
               ),
-              const SizedBox(height: 20,),
+              const SizedBox(height: 12,),
               TextInput(
                 controller: _passwordController,
                 hintText: "Password",
                 inputType: TextInputType.text,
                 isPassword: true,
               ),
-              const SizedBox(height: 20,),
+              const SizedBox(height: 12,),
               InkWell(
-                onTap: () {},
+                onTap: () {
+
+                },
                 child: Container(
                   width: double.infinity,
                   height: 45,
