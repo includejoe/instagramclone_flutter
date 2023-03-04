@@ -8,9 +8,15 @@ class StorageMethods {
 
   Future<String> uploadImageToStorage(
     String childName,
-    Uint8List file,
+    Uint8List image,
     bool isPost
-  ) {
+  ) async {
       Reference ref = _storage.ref().child(childName).child(_auth.currentUser!.uid);
+
+      UploadTask uploadTask =  ref.putData(image);
+
+      TaskSnapshot snap =  await uploadTask;
+      String downloadUrl =  await snap.ref.getDownloadURL();
+      return downloadUrl;
   }
 }

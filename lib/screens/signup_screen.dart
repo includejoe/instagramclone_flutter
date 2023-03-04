@@ -2,11 +2,16 @@ import "dart:typed_data";
 import "package:flutter/material.dart";
 import "package:flutter_svg/flutter_svg.dart";
 import "package:image_picker/image_picker.dart";
+import "package:instagram_clone/screens/login_screen.dart";
 import "package:instagram_clone/utils/colors.dart";
 import "package:instagram_clone/utils/utils.dart";
 import "package:instagram_clone/view_models/authentication_vm.dart";
 import "package:instagram_clone/widgets/text_input.dart";
 import "package:instagram_clone/utils/dimensions.dart";
+
+import "../responsive/mobile_screen_layout.dart";
+import "../responsive/responsive_layout_screen.dart";
+import "../responsive/web_screen_layout.dart";
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({Key? key}) : super(key: key);
@@ -20,8 +25,8 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _bioController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
-  final avatarImageUri = "https://www.pngall.com/wp-content/uploads/12/Avatar-Profile-PNG-Picture.png";
   Uint8List? image;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -33,10 +38,45 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   void selectImage () async {
-    Uint8List _image = await pickImage(ImageSource.gallery);
+    Uint8List pickedImage = await pickImage(ImageSource.gallery);
     setState(() {
-      image = _image;
+      image = pickedImage;
     });
+  }
+
+  void registerUser (context) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    String response = await AuthenticationViewModel().registerUser(
+      email: _emailController.text,
+      password: _passwordController.text,
+      username: _usernameController.text,
+      bio: _bioController.text,
+      image: image,
+    );
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if(response != "success") {
+      showSnackBar(context, response);
+    } else {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => const ResponsiveLayout(
+          mobileScreenLayout: MobileScreenLayout(),
+          webScreenLayout: WebScreenLayout(),
+        ))
+      );
+    }
+  }
+
+  void navigateToLogin() {
+    Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => const LoginScreen())
+    );
   }
 
   @override
@@ -54,7 +94,6 @@ class _SignupScreenState extends State<SignupScreen> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  // const SizedBox(height: 200,),
                   SvgPicture.asset(
                     "assets/ic_instagram.svg",
                     color: primaryColor,
@@ -67,9 +106,9 @@ class _SignupScreenState extends State<SignupScreen> {
                         radius: 60,
                         backgroundImage: MemoryImage(image!),
                       ) :
-                      CircleAvatar(
+                      const CircleAvatar(
                         radius: 60,
-                        backgroundImage: NetworkImage(avatarImageUri),
+                        backgroundImage: AssetImage("assets/avatar.jpg"),
                       ),
                       Positioned(
                         bottom: 0,
@@ -119,15 +158,16 @@ class _SignupScreenState extends State<SignupScreen> {
                     isPassword: true,
                   ),
                   const SizedBox(height: 20,),
+                  _isLoading ? const SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: Center(child: CircularProgressIndicator(
+                      strokeWidth: 3,
+                    ),),
+                  ) :
                   InkWell(
-                    onTap: () async {
-                      String response = await AuthenticationViewModel().registerUser(
-                          email: _emailController.text,
-                          password: _passwordController.text,
-                          username: _usernameController.text,
-                          bio: _bioController.text,
-                          image: image,
-                      );
+                    onTap: () {
+                      registerUser(context);
                     },
                     child: Container(
                       width: double.infinity,
@@ -156,7 +196,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       const Text("Already have an account ?"),
                       const SizedBox(width: 5,),
                       GestureDetector(
-                        onTap: () {},
+                        onTap: navigateToLogin,
                         child: const Text(
                           "LOGIN",
                           style: TextStyle(
