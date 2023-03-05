@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:instagram_clone/models/user.dart';
 import 'package:instagram_clone/view_models/authentication_vm.dart';
 
-
 class UserProvider with ChangeNotifier {
   User? _user;
   final AuthenticationViewModel _authViewModel = AuthenticationViewModel();
